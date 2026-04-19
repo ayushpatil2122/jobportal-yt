@@ -1,12 +1,19 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
 import { User } from "./models/user.model.js";
 import { Company } from "./models/company.model.js";
 import { Job } from "./models/job.model.js";
 
-const MONGO_URI = "mongodb+srv://ayushitkhede4_db_user:YOLqncTSIgpwnCDW@cluster0.9jaumaj.mongodb.net/";
+dotenv.config();
+
+const MONGO_URI = process.env.MONGO_URI;
 
 async function seed() {
+    if (!MONGO_URI) {
+        console.error("MONGO_URI not set. Copy backend/.env.example to backend/.env and fill it in.");
+        process.exit(1);
+    }
     try {
         await mongoose.connect(MONGO_URI);
         console.log("Connected to MongoDB");
@@ -14,11 +21,11 @@ async function seed() {
         const hashedPassword = await bcrypt.hash("test1234", 10);
 
         // ── Student user ──
-        let student = await User.findOne({ email: "student@talendy.com" });
+        let student = await User.findOne({ email: "student@jobohire.com" });
         if (!student) {
             student = await User.create({
                 fullname: "Nihar Joshi",
-                email: "student@talendy.com",
+                email: "student@jobohire.com",
                 phoneNumber: 9876543210,
                 password: hashedPassword,
                 role: "student",
@@ -43,11 +50,11 @@ async function seed() {
         }
 
         // ── Recruiter user ──
-        let recruiter = await User.findOne({ email: "recruiter@talendy.com" });
+        let recruiter = await User.findOne({ email: "recruiter@jobohire.com" });
         if (!recruiter) {
             recruiter = await User.create({
                 fullname: "Admin Recruiter",
-                email: "recruiter@talendy.com",
+                email: "recruiter@jobohire.com",
                 phoneNumber: 9876543211,
                 password: hashedPassword,
                 role: "recruiter",
@@ -102,12 +109,12 @@ async function seed() {
         console.log("\nTest Credentials:");
         console.log("─────────────────────────────────");
         console.log("STUDENT LOGIN:");
-        console.log("  Email:    student@talendy.com");
+        console.log("  Email:    student@jobohire.com");
         console.log("  Password: test1234");
         console.log("  Role:     student");
         console.log("─────────────────────────────────");
         console.log("RECRUITER LOGIN:");
-        console.log("  Email:    recruiter@talendy.com");
+        console.log("  Email:    recruiter@jobohire.com");
         console.log("  Password: test1234");
         console.log("  Role:     recruiter");
         console.log("─────────────────────────────────\n");

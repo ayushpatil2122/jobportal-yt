@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { RadioGroup } from '../ui/radio-group';
@@ -7,9 +8,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoading, setUser } from '@/redux/authSlice';
-import { setAllJobs, setAllAppliedJobs } from '@/redux/jobSlice';
 import { Loader2 } from 'lucide-react';
-import { TEST_CREDENTIALS, MOCK_USER, MOCK_RECRUITER, MOCK_JOBS, MOCK_APPLIED_JOBS } from '@/utils/mockData';
+import { USER_API_END_POINT } from '@/utils/constant';
 
 const Login = () => {
     const [input, setInput] = useState({ email: "", password: "", role: "" });
@@ -29,43 +29,29 @@ const Login = () => {
             return;
         }
 
-        dispatch(setLoading(true));
+        try {
+            dispatch(setLoading(true));
+            const res = await axios.post(
+                `${USER_API_END_POINT}/login`,
+                input,
+                {
+                    headers: { "Content-Type": "application/json" },
+                    withCredentials: true,
+                }
+            );
 
-        // Simulate network delay
-        await new Promise(r => setTimeout(r, 600));
-
-        const { email, password, role } = input;
-
-        // Check hardcoded student creds
-        if (
-            email === TEST_CREDENTIALS.student.email &&
-            password === TEST_CREDENTIALS.student.password &&
-            role === TEST_CREDENTIALS.student.role
-        ) {
-            dispatch(setUser(MOCK_USER));
-            dispatch(setAllJobs(MOCK_JOBS));
-            dispatch(setAllAppliedJobs(MOCK_APPLIED_JOBS));
+            if (res.data?.success) {
+                dispatch(setUser(res.data.user));
+                toast.success(res.data.message || `Welcome back, ${res.data.user.fullname}`);
+                navigate(res.data.user.role === "recruiter" ? "/admin/companies" : "/dashboard");
+            } else {
+                toast.error(res.data?.message || "Login failed");
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Login failed");
+        } finally {
             dispatch(setLoading(false));
-            toast.success(`Welcome back, ${MOCK_USER.fullname}`);
-            navigate("/dashboard");
-            return;
         }
-
-        // Check hardcoded recruiter creds
-        if (
-            email === TEST_CREDENTIALS.recruiter.email &&
-            password === TEST_CREDENTIALS.recruiter.password &&
-            role === TEST_CREDENTIALS.recruiter.role
-        ) {
-            dispatch(setUser(MOCK_RECRUITER));
-            dispatch(setLoading(false));
-            toast.success(`Welcome back, ${MOCK_RECRUITER.fullname}`);
-            navigate("/admin/companies");
-            return;
-        }
-
-        dispatch(setLoading(false));
-        toast.error("Invalid credentials. Use the test accounts shown below.");
     };
 
     useEffect(() => {

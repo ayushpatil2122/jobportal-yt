@@ -1,11 +1,18 @@
 import mongoose from "mongoose";
 
 const connectDB = async () => {
-    try {
-        await mongoose.connect("mongodb+srv://ayushitkhede4_db_user:YOLqncTSIgpwnCDW@cluster0.9jaumaj.mongodb.net/");
-        console.log('mongodb connected successfully');
-    } catch (error) {
-        console.log(error);
+    const uri = process.env.MONGO_URI;
+    if (!uri) {
+        console.error("MONGO_URI is not set. Copy backend/.env.example to backend/.env and fill it in.");
+        process.exit(1);
     }
-}
+    try {
+        await mongoose.connect(uri);
+        console.log("MongoDB connected successfully");
+    } catch (error) {
+        console.error("MongoDB connection failed:", error.message);
+        process.exit(1);
+    }
+};
+
 export default connectDB;
