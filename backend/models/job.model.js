@@ -16,9 +16,9 @@ const jobSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    experienceLevel:{
-        type:Number,
-        required:true,
+    experienceLevel: {
+        type: Number,
+        required: true,
     },
     location: {
         type: String,
@@ -32,6 +32,19 @@ const jobSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    deadline: {
+        type: Date
+    },
+    duration: {
+        value: { type: Number },
+        unit: { type: String, enum: ['days', 'weeks', 'months'], default: 'days' }
+    },
+    eligibility: [{
+        type: String
+    }],
+    tags: [{
+        type: String
+    }],
     company: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Company',
@@ -42,11 +55,10 @@ const jobSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    applications: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Application',
-        }
-    ]
-},{timestamps:true});
+    applications: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Application',
+    }]
+}, { timestamps: true });
+
 export const Job = mongoose.model("Job", jobSchema);

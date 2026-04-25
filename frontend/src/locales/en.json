@@ -1,0 +1,241 @@
+{
+  "nav": {
+    "about": "About",
+    "problem": "Problem",
+    "solution": "Solution",
+    "companies": "Companies",
+    "whyUs": "Why Us",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "badge_from": "INDIA",
+    "badge_to": "JAPAN TALENT BRIDGE",
+    "title1": "Where Top Talent",
+    "title2": "Meets Global",
+    "title3": "Opportunity",
+    "subtitle": "The structured recruitment platform bridging India's finest engineering talent with Japan's leading companies. From",
+    "subtitle_highlight": "internships to full-time careers",
+    "subtitle_end": ".",
+    "cta_primary": "Start Your Journey",
+    "cta_secondary": "Learn More"
+  },
+  "stats": {
+    "gap_label": "IT Professional Gap",
+    "gap_sub": "Japan by 2030",
+    "institutions_label": "Partner Institutions",
+    "institutions_sub": "IITs, NITs, BITS",
+    "companies_label": "Global Companies",
+    "companies_sub": "Hiring Now",
+    "conversion_label": "Conversion Rate",
+    "conversion_sub": "Intern to Full-time"
+  },
+  "marquee": {
+    "tagline": "Trusted by leading organizations across Japan"
+  },
+  "about": {
+    "label": "About Us",
+    "title1": "Building the Future of",
+    "title2": "Cross-Border Hiring",
+    "body1": "Job-O-Hire was born from a simple observation: Japan faces a critical workforce shortage with ~789,000 IT professionals needed by 2030, while India produces the world's largest pool of skilled engineering graduates seeking global opportunities.",
+    "body2": "We bridge this gap with a structured recruitment platform that connects pre-screened, curated talent from India's premier institutions — IITs, NITs, BITS, and more — directly with verified employers in Japan and beyond. Our focus on early-career hiring, from internships to full-time roles, ensures quality placements that benefit both talent and companies.",
+    "tag1": "Early-Career Focus",
+    "tag2": "India-Japan Bridge",
+    "tag3": "Pre-Screened Talent",
+    "tag4": "T&P Integrated",
+    "mission_title": "Our Mission",
+    "mission_sub": "Democratizing global careers",
+    "feature1_label": "Verified Employers",
+    "feature1_value": "Every listing authenticated",
+    "feature2_label": "Premier Institutions",
+    "feature2_value": "IITs, NITs, BITS, IIITs",
+    "feature3_label": "Career Pipeline",
+    "feature3_value": "Internship to full-time",
+    "feature4_label": "Cross-Cultural",
+    "feature4_value": "Language flexible hiring"
+  },
+  "problem": {
+    "label": "The Problem",
+    "title": "A Broken Hiring Pipeline",
+    "subtitle_start": "Japan's Ministry of Economy projects a",
+    "subtitle_highlight": "~789,000 IT professional shortage by 2030",
+    "subtitle_end": ". Existing platforms fail both sides of the equation.",
+    "japan_title": "For Japanese Recruiters",
+    "japan_sub": "Critical workforce challenges",
+    "japan_items": [
+      "Aging population causing critical workforce shortage",
+      "~789,000 IT professionals gap projected by 2030",
+      "Limited access to verified global talent pools",
+      "No platform specializing in early talent hiring",
+      "High cost and time for international recruitment"
+    ],
+    "india_title": "For Indian Students",
+    "india_sub": "Opportunity gap challenges",
+    "india_items": [
+      "Limited visibility into global career opportunities",
+      "No structured internship → full-time pipeline",
+      "Flooded with fake or irrelevant job listings",
+      "Lack of college T&P cell integration with employers",
+      "No focus on curated, pre-screened early careers"
+    ]
+  },
+  "solution": {
+    "label": "Our Solution",
+    "title": "India-Japan Talent Bridge",
+    "subtitle": "A dual-sided platform connecting curated Indian talent with verified global employers",
+    "features": [
+      {
+        "title": "Pre-Screened Talent Pool",
+        "desc": "Curated candidates from IITs, NITs, IIITs, BITS, and select premier institutions. Quality over quantity."
+      },
+      {
+        "title": "Internship → Full-Time",
+        "desc": "Structured conversion pathway from internships to permanent roles. Companies hire with measurable confidence."
+      },
+      {
+        "title": "College T&P Integration",
+        "desc": "Direct connection with Training & Placement cells of premium institutions for trusted hiring at scale."
+      },
+      {
+        "title": "Verified Opportunities",
+        "desc": "Eliminates fake or irrelevant job listings. Every opportunity is authenticated, vetted, and real."
+      },
+      {
+        "title": "Skill + Project Evaluation",
+        "desc": "Candidates assessed on skills and real projects, not just resumes. Strong emphasis on motivation & culture fit."
+      },
+      {
+        "title": "Language Flexibility",
+        "desc": "Japanese language optional and company-defined. Designed for seamless cross-cultural collaboration."
+      }
+    ]
+  },
+  "audience": {
+    "label": "Who It's For",
+    "title": "A Dual-Side Platform",
+    "talent_title": "For Talent",
+    "talent_sub": "Students & Fresh Graduates",
+    "talent_items": [
+      "IIT, NIT, IIIT, BITS & select premier colleges",
+      "Engineering & Management students",
+      "Pre-final & final year candidates",
+      "Graduates with global career aspirations"
+    ],
+    "employer_title": "For Employers",
+    "employer_sub": "Companies & HR Teams",
+    "employer_items": [
+      "Japanese companies expanding global hiring",
+      "Indian startups to enterprises",
+      "HR teams seeking efficient early-talent pipelines",
+      "Companies looking for verified, job-ready candidates"
+    ]
+  },
+  "whyUs": {
+    "label": "Why Job-O-Hire",
+    "title1": "Not Just Another",
+    "title2": "Job Portal",
+    "subtitle": "Inspired by platforms like Tech Japan and Talendy, but built to be more scalable, more focused, and more impactful across industries.",
+    "features": [
+      {
+        "title": "Focused on Early-Career Hiring",
+        "desc": "Designed specifically for pre-final & final-year talent — not generic job seekers. We understand the student lifecycle."
+      },
+      {
+        "title": "Structured Conversion Pipeline",
+        "desc": "Internship → full-time pathways with clear metrics. Companies hire with confidence through proven evaluation."
+      },
+      {
+        "title": "Deep Institutional Integration",
+        "desc": "Direct partnerships with college T&P cells ensure trusted, verified hiring at scale. No middlemen."
+      },
+      {
+        "title": "Zero Tolerance for Fake Listings",
+        "desc": "Every opportunity is vetted and authenticated. Students see only real, relevant positions from verified employers."
+      },
+      {
+        "title": "Skills & Projects Over Resumes",
+        "desc": "Evaluation based on real work, motivation statements, and culture fit — not just keywords on paper."
+      }
+    ]
+  },
+  "partners": {
+    "label": "Our Partners",
+    "title": "Future Host Companies",
+    "subtitle": "Organizations we're actively engaging with for talent collaboration"
+  },
+  "howItWorks": {
+    "label": "How It Works",
+    "title": "Your Journey in 4 Steps",
+    "steps": [
+      {
+        "title": "Create Profile",
+        "desc": "Build your profile with skills, projects, resume, and intro video."
+      },
+      {
+        "title": "Browse & Apply",
+        "desc": "Discover curated internships filtered by your preferences."
+      },
+      {
+        "title": "Interview",
+        "desc": "Receive invites, prepare with resources, and attend sessions."
+      },
+      {
+        "title": "Get Hired",
+        "desc": "Accept your offer and begin your global career journey."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Ready to Bridge the Gap?",
+    "subtitle": "Whether you're a student dreaming of global opportunities or a company seeking exceptional talent — your journey starts here.",
+    "student": "I'm a Student",
+    "recruiter": "I'm a Recruiter"
+  },
+  "contact": {
+    "label": "Get In Touch",
+    "title": "Partner With Us",
+    "subtitle": "Interested in hiring India's top engineering talent for your company? We'd love to hear from you.",
+    "info_title": "Why reach out?",
+    "info_items": [
+      { "title": "Free Consultation", "desc": "Discuss your hiring needs with our team at no cost." },
+      { "title": "Tailored Talent Matching", "desc": "We curate candidates specifically aligned to your requirements." },
+      { "title": "Fast Response", "desc": "Our team responds within 24 hours on business days." },
+      { "title": "Dedicated Support", "desc": "A dedicated account manager for every partner company." }
+    ],
+    "direct_title": "Direct Contact",
+    "email_label": "Email Us",
+    "email_value": "partnerships@joboHire.com",
+    "phone_label": "Call Us",
+    "phone_value": "+91 98765 43210",
+    "form_title": "Send Us a Message",
+    "field_name": "Your Name",
+    "field_company": "Company Name",
+    "field_email": "Work Email",
+    "field_interest": "I'm interested in...",
+    "interest_options": [
+      "Hiring Interns",
+      "Full-Time Recruitment",
+      "Both Internships & Full-Time",
+      "Partnership / Collaboration",
+      "Other"
+    ],
+    "field_message": "Tell us about your hiring needs...",
+    "submit": "Send Message",
+    "submitting": "Sending...",
+    "success_title": "Message Sent!",
+    "success_desc": "Thank you for reaching out. Our team will get back to you within 24 hours."
+  },
+  "footer": {
+    "tagline": "Bridging India's finest talent with Japan's leading companies through structured early-career hiring.",
+    "platform": "Platform",
+    "platform_links": ["Browse Internships", "Companies Directory", "Student Dashboard", "For Recruiters"],
+    "company": "Company",
+    "company_links": ["About Us", "Careers", "Blog", "Contact"],
+    "legal": "Legal",
+    "legal_links": ["Privacy Policy", "Terms of Service", "Cookie Policy", "GDPR Compliance"],
+    "copyright": "Job-O-Hire. All rights reserved.",
+    "bottomTagline": "Bridging Indian talent with global opportunities"
+  }
+}
