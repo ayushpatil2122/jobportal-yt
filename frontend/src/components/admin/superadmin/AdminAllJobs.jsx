@@ -81,7 +81,7 @@ const AdminAllJobs = () => {
             </div>
 
             <div className="flex items-center gap-3 mb-4 flex-wrap">
-                <form onSubmit={(e) => { e.preventDefault(); fetchJobs(); }} className="flex items-center gap-2 px-3 py-2 bg-card rounded-lg border border-border w-72">
+                <form onSubmit={(e) => { e.preventDefault(); fetchJobs(); }} className="flex items-center gap-2 px-3 py-2 bg-card rounded-lg border border-border w-full sm:w-72">
                     <Search size={16} className="text-muted-foreground" />
                     <input
                         value={q}
@@ -93,7 +93,7 @@ const AdminAllJobs = () => {
                 <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground"
+                    className="w-full sm:w-auto rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground"
                 >
                     <option value="all">All statuses</option>
                     <option value="open">Open</option>

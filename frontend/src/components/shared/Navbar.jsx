@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Button } from '../ui/button';
 import { Avatar, AvatarImage } from '../ui/avatar';
-import { LogOut, User2 } from 'lucide-react';
+import { LogOut, User2, Menu, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
@@ -15,6 +15,20 @@ const Navbar = () => {
     const { user } = useSelector(store => store.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const isStaff = user?.role === 'recruiter' || user?.role === 'admin';
+    const navLinks = isStaff
+        ? [
+            { to: '/admin/companies', label: 'Companies' },
+            { to: '/admin/jobs', label: 'Jobs' },
+            { to: '/admin/internships', label: 'Internships' },
+        ]
+        : [
+            { to: '/dashboard', label: 'Home' },
+            { to: '/internships', label: 'Internships' },
+            { to: '/companies', label: 'Companies' },
+        ];
 
     const logoutHandler = async () => {
         try {
@@ -23,6 +37,7 @@ const Navbar = () => {
             // Backend offline, proceed with client-side logout
         }
         dispatch(setUser(null));
+        setMobileMenuOpen(false);
         navigate("/login");
         toast.success("Logged out successfully.");
     };
@@ -30,25 +45,19 @@ const Navbar = () => {
     return (
         <div className="bg-card border-b border-border">
             <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4">
-                <Link to={(user?.role === 'recruiter' || user?.role === 'admin') ? '/admin/companies' : '/dashboard'} className="flex items-center gap-2">
+                <Link to={isStaff ? '/admin/companies' : '/dashboard'} className="flex items-center gap-2">
                     <BrandLogo size="sm" />
                 </Link>
 
-                <div className="flex items-center gap-8">
+                <div className="hidden md:flex items-center gap-8">
                     <ul className="flex font-medium items-center gap-5">
-                        {(user?.role === 'recruiter' || user?.role === 'admin') ? (
-                            <>
-                                <li><Link to="/admin/companies" className="text-muted-foreground hover:text-foreground transition-colors">Companies</Link></li>
-                                <li><Link to="/admin/jobs" className="text-muted-foreground hover:text-foreground transition-colors">Jobs</Link></li>
-                                <li><Link to="/admin/internships" className="text-muted-foreground hover:text-foreground transition-colors">Internships</Link></li>
-                            </>
-                        ) : (
-                            <>
-                                <li><Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Home</Link></li>
-                                <li><Link to="/internships" className="text-muted-foreground hover:text-foreground transition-colors">Internships</Link></li>
-                                <li><Link to="/companies" className="text-muted-foreground hover:text-foreground transition-colors">Companies</Link></li>
-                            </>
-                        )}
+                        {navLinks.map((link) => (
+                            <li key={link.to}>
+                                <Link to={link.to} className="text-muted-foreground hover:text-foreground transition-colors">
+                                    {link.label}
+                                </Link>
+                            </li>
+                        ))}
                     </ul>
 
                     {!user ? (
@@ -92,7 +101,65 @@ const Navbar = () => {
                         </Popover>
                     )}
                 </div>
+
+                <button
+                    className="md:hidden inline-flex items-center justify-center p-2 rounded-md border border-border text-foreground hover:bg-white/5 transition-colors"
+                    onClick={() => setMobileMenuOpen((prev) => !prev)}
+                    aria-label="Toggle navigation menu"
+                >
+                    {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                </button>
             </div>
+
+            {mobileMenuOpen && (
+                <div className="md:hidden border-t border-border px-4 py-3 space-y-3">
+                    <ul className="space-y-1">
+                        {navLinks.map((link) => (
+                            <li key={link.to}>
+                                <Link
+                                    to={link.to}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="block px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+                                >
+                                    {link.label}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+
+                    {!user ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                            <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                                <Button variant="outline" className="w-full bg-white/5 border-border text-foreground">Login</Button>
+                            </Link>
+                            <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>
+                                <Button className="w-full bg-primary hover:bg-primary/90 text-white">Signup</Button>
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="space-y-2 pt-1">
+                            {user?.role === 'student' && (
+                                <Link
+                                    to="/profile"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="w-full inline-flex items-center justify-center gap-2 p-2 rounded-lg bg-white/5 text-sm text-foreground"
+                                >
+                                    <User2 size={16} />
+                                    View Profile
+                                </Link>
+                            )}
+                            <Button
+                                onClick={logoutHandler}
+                                variant="outline"
+                                className="w-full inline-flex items-center justify-center gap-2 border-red-500/40 text-red-400 hover:bg-red-500/10"
+                            >
+                                <LogOut size={16} />
+                                Logout
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

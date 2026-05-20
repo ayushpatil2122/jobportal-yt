@@ -31,18 +31,18 @@ const Header = () => {
 
     return (
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border">
-            <div className="flex items-center justify-between h-16 px-4 lg:px-8">
+            <div className="flex items-center justify-between h-16 px-3 sm:px-4 lg:px-8 gap-2">
                 {/* Breadcrumb */}
-                <div className="flex items-center gap-2 text-sm ml-12 lg:ml-0">
-                    <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">Home</Link>
-                    <ChevronRight size={14} className="text-muted-foreground" />
-                    <span className="font-medium text-foreground">{pageTitle}</span>
+                <div className="flex items-center gap-2 text-sm ml-11 sm:ml-12 lg:ml-0 min-w-0">
+                    <Link to="/dashboard" className="hidden sm:inline text-muted-foreground hover:text-foreground transition-colors">Home</Link>
+                    <ChevronRight size={14} className="hidden sm:block text-muted-foreground" />
+                    <span className="font-medium text-foreground truncate">{pageTitle}</span>
                 </div>
 
                 {/* Right Section */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                     {/* Search */}
-                    <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-card rounded-lg border border-border w-64">
+                    <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-card rounded-lg border border-border w-56 lg:w-64">
                         <Search size={16} className="text-muted-foreground" />
                         <input
                             type="text"
