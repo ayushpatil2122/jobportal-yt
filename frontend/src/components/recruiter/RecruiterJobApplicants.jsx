@@ -169,12 +169,12 @@ const RecruiterJobApplicants = () => {
                             {job?.jobType || ''} · {applications.length} total applicants
                         </p>
                     </div>
-                    <Button onClick={exportToCsv} className="inline-flex items-center gap-2">
+                    <Button onClick={exportToCsv} className="inline-flex items-center justify-center gap-2 w-full sm:w-auto">
                         <Download size={16} /> Export CSV
                     </Button>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3 mb-5">
                     <button
                         onClick={() => setFilter('all')}
                         className={`p-4 rounded-xl border text-left transition ${filter === 'all' ? 'border-primary bg-primary/10' : 'border-border bg-white/5 hover:bg-white/10'}`}

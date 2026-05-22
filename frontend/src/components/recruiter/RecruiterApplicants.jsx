@@ -151,21 +151,21 @@ const RecruiterApplicants = () => {
                             Pick a job to review its applicants, view profiles, and export data.
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
                         <Button
                             variant="outline"
                             onClick={exportAllApplicants}
-                            className="inline-flex items-center gap-2"
+                            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto"
                             disabled={loading || jobs.length === 0}
                         >
                             <Download size={16} /> Export all (CSV)
                         </Button>
-                        <Button variant="outline" onClick={logout}>Logout</Button>
+                        <Button variant="outline" className="w-full sm:w-auto" onClick={logout}>Logout</Button>
                     </div>
                 </div>
 
                 {/* Top-line totals across all jobs */}
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3 mb-6">
                     <div className="p-4 rounded-xl border border-border bg-white/5">
                         <div className="text-xs text-muted-foreground uppercase tracking-wider">Total Applicants</div>
                         <div className="text-2xl font-bold text-foreground mt-1">{totals.total}</div>

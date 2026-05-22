@@ -21,19 +21,19 @@ const AdminInternships = () => {
     );
 
     return (
-        <div className="min-h-screen bg-background p-6">
+        <div className="min-h-screen bg-background p-4 sm:p-6">
             <div className="max-w-6xl mx-auto">
                 <button onClick={() => navigate('/admin/companies')} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
                     <ArrowLeft size={16} />Back
                 </button>
-                <div className="flex items-center justify-between my-5">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 my-5">
                     <Input
-                        className="w-fit bg-white/5 border-border text-foreground"
+                        className="w-full sm:w-80 bg-white/5 border-border text-foreground"
                         placeholder="Filter by title, company"
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
                     />
-                    <Button className="bg-primary hover:bg-primary/90 text-white" onClick={() => navigate('/admin/internships/create')}>New Internship</Button>
+                    <Button className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white" onClick={() => navigate('/admin/internships/create')}>New Internship</Button>
                 </div>
                 <div className="glass-card rounded-xl p-4">
                     <Table>

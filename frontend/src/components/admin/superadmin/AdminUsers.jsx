@@ -73,7 +73,7 @@ const AdminUsers = () => {
     return (
         <AdminShell title="Users" subtitle="Manage all platform users">
             <div className="flex items-center gap-3 mb-4 flex-wrap">
-                <form onSubmit={onSearchSubmit} className="flex items-center gap-2 px-3 py-2 bg-card rounded-lg border border-border w-72">
+                <form onSubmit={onSearchSubmit} className="flex items-center gap-2 px-3 py-2 bg-card rounded-lg border border-border w-full sm:w-72">
                     <Search size={16} className="text-muted-foreground" />
                     <input
                         value={q}
@@ -85,7 +85,7 @@ const AdminUsers = () => {
                 <select
                     value={roleFilter}
                     onChange={(e) => setRoleFilter(e.target.value)}
-                    className="px-3 py-2 rounded-lg bg-card border border-border text-foreground text-sm"
+                    className="w-full sm:w-auto px-3 py-2 rounded-lg bg-card border border-border text-foreground text-sm"
                 >
                     <option value="">All roles</option>
                     {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
@@ -93,7 +93,7 @@ const AdminUsers = () => {
                 <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="px-3 py-2 rounded-lg bg-card border border-border text-foreground text-sm"
+                    className="w-full sm:w-auto px-3 py-2 rounded-lg bg-card border border-border text-foreground text-sm"
                 >
                     <option value="">All statuses</option>
                     <option value="pending">Pending</option>

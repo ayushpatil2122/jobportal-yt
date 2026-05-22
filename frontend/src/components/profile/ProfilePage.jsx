@@ -369,18 +369,18 @@ const ProfilePage = () => {
                                 { id: 'college', label: 'College', type: 'text' },
                                 { id: 'graduationYear', label: 'Graduation Year', type: 'number' },
                             ].map(field => (
-                                <div key={field.id} className="grid grid-cols-4 items-center gap-3">
-                                    <Label htmlFor={field.id} className="text-right text-xs">{field.label}</Label>
+                                <div key={field.id} className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-3">
+                                    <Label htmlFor={field.id} className="sm:text-right text-xs">{field.label}</Label>
                                     <Input id={field.id} name={field.id} type={field.type}
                                         value={editForm[field.id]}
                                         onChange={e => setEditForm({ ...editForm, [field.id]: e.target.value })}
-                                        className="col-span-3 bg-white/5 border-border" />
+                                        className="sm:col-span-3 bg-white/5 border-border" />
                                 </div>
                             ))}
-                            <div className="grid grid-cols-4 items-center gap-3">
-                                <Label className="text-right text-xs">Gender</Label>
+                            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-3">
+                                <Label className="sm:text-right text-xs">Gender</Label>
                                 <select value={editForm.gender} onChange={e => setEditForm({ ...editForm, gender: e.target.value })}
-                                    className="col-span-3 bg-white/5 border border-border rounded-md px-3 py-2 text-sm text-foreground">
+                                    className="sm:col-span-3 bg-white/5 border border-border rounded-md px-3 py-2 text-sm text-foreground">
                                     <option value="">Select</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>

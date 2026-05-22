@@ -43,7 +43,7 @@ const AdminAllInternships = () => {
     return (
         <AdminShell title="Internships" subtitle="All internships across the platform">
             <div className="flex items-center gap-3 mb-4 flex-wrap">
-                <form onSubmit={(e) => { e.preventDefault(); fetchData(); }} className="flex items-center gap-2 px-3 py-2 bg-card rounded-lg border border-border w-72">
+                <form onSubmit={(e) => { e.preventDefault(); fetchData(); }} className="flex items-center gap-2 px-3 py-2 bg-card rounded-lg border border-border w-full sm:w-72">
                     <Search size={16} className="text-muted-foreground" />
                     <input
                         value={q}
