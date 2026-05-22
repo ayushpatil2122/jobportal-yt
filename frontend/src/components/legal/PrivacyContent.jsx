@@ -62,7 +62,7 @@ const PrivacyContent = () => {
                     <p>Last revised: May 4, 2026</p>
                     <p className="mt-1">Personal information protection manager:</p>
                     <p>Founder &mdash; Rupesh Jahagirdar</p>
-                    <p>Contact: <a href="mailto:collaborations@jobhire.com" className="text-primary hover:underline">collaborations@jobhire.com</a></p>
+                    <p>Contact: <a href="mailto:collaborations@jobohire.com" className="text-primary hover:underline">collaborations@jobohire.com</a></p>
                 </div>
             </Section>
 
@@ -142,8 +142,8 @@ const PrivacyContent = () => {
                 </p>
                 <p>
                     For GDPR-related requests or concerns, users can contact{' '}
-                    <a href="mailto:collaborations@jobhire.com" className="text-primary hover:underline">
-                        collaborations@jobhire.com
+                    <a href="mailto:collaborations@jobohire.com" className="text-primary hover:underline">
+                        collaborations@jobohire.com
                     </a>.
                 </p>
             </Section>
