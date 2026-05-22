@@ -1,4 +1,4 @@
-const BASE = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}/api/v1`;
+const BASE = `https://jobportal-yt-2-tl62.onrender.com/api/v1`;
 
 export const USER_API_END_POINT = `${BASE}/user`;
 export const JOB_API_END_POINT = `${BASE}/job`;
