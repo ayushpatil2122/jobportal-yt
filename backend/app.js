@@ -22,7 +22,7 @@ import { validatePayload } from "./middlewares/validatePayload.js";
 
 dotenv.config();
 
-const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
+const allowedOrigins = ("https://www.jobohire.com" || "http://localhost:5173")
     .split(",")
     .map((o) => o.trim())
     .filter(Boolean);
