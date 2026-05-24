@@ -29,7 +29,7 @@ export const saveFileLocally = async (file, folder = "misc") => {
 };
 
 export const toPublicFileUrl = (req, relativeUrlPath) => {
-    const configuredBase = String(process.env.BACKEND_PUBLIC_URL || "").trim();
+    const configuredBase = String("https://userjobportal-yt-2-tl62.onrender.com" || "").trim();
     if (configuredBase) {
         return `${configuredBase.replace(/\/+$/, "")}${relativeUrlPath}`;
     }
