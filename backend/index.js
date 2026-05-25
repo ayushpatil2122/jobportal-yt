@@ -13,7 +13,7 @@ const startServer = async () => {
         logger.info("server_started", {
             port: PORT,
             allowedOrigins: appConfig.allowedOrigins,
-            env: process.env.NODE_ENV || "development",
+            env: "production" || "development",
         });
     });
 };
