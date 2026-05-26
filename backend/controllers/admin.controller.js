@@ -115,7 +115,6 @@ export const approveStudent = async (req, res) => {
         //     return res.status(401).json({ message: "User not authenticated", success: false });
         // }
         const user = await User.findById(req.params.id);
-        console.log(user);
         
         if (!user) return res.status(404).json({ message: "User not found.", success: false });
         if (user.role !== 'student') {
