@@ -108,23 +108,44 @@ export const listUsers = async (req, res) => {
 export const approveStudent = async (req, res) => {
     try {
         if (!isValidObjectId(req.params.id)) {
-            return res.status(400).json({ message: "Invalid user id.", success: false });
+            return res.status(400).json({
+                message: "Invalid user id.",
+                success: false
+            });
         }
-        // const actor = await getActorContext(req);
-        // if (!actor) {
-        //     return res.status(401).json({ message: "User not authenticated", success: false });
-        // }
+
+        const actor = await getActorContext(req);
+
+        if (!actor) {
+            return res.status(401).json({
+                message: "User not authenticated",
+                success: false
+            });
+        }
+
         const user = await User.findById(req.params.id);
-        
-        if (!user) return res.status(404).json({ message: "User not found.", success: false });
-        if (user.role !== 'student') {
-            return res.status(400).json({ message: "Only student accounts require approval.", success: false });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found.",
+                success: false
+            });
         }
-        user.status = 'approved';
+
+        if (user.role !== "student") {
+            return res.status(400).json({
+                message: "Only student accounts require approval.",
+                success: false
+            });
+        }
+
+        user.status = "approved";
         user.approvedBy = actor.actorId;
         user.approvedAt = new Date();
         user.rejectionReason = "";
+
         await user.save();
+
         await recordAuditLog({
             req,
             actorId: actor.actorId,
@@ -132,17 +153,29 @@ export const approveStudent = async (req, res) => {
             action: "student.approved",
             entityType: "User",
             entityId: user._id,
-            metadata: { targetEmail: user.email },
+            metadata: {
+                targetEmail: user.email,
+            },
         });
+
         const safe = user.toObject();
         delete safe.password;
-        return res.status(200).json({ message: "Student approved.", user: safe, success: true });
+
+        return res.status(200).json({
+            message: "Student approved.",
+            user: safe,
+            success: true,
+        });
+
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ message: "Server error", success: false });
+
+        return res.status(500).json({
+            message: error.message,
+            success: false,
+        });
     }
 };
-
 export const rejectStudent = async (req, res) => {
     try {
         if (!isValidObjectId(req.params.id)) {
