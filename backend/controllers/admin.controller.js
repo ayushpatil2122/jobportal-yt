@@ -104,12 +104,6 @@ export const approveStudent = async (req, res) => {
             return res.status(400).json({ message: "Invalid user id.", success: false });
         }
 
-        // FIX: getActorContext is now synchronous — removed stale await.
-        const actor = getActorContext(req);
-        if (!actor) {
-            return res.status(401).json({ message: "User not authenticated", success: false });
-        }
-
         const user = await User.findById(req.params.id);
         if (!user) {
             return res.status(404).json({ message: "User not found.", success: false });
@@ -147,12 +141,6 @@ export const rejectStudent = async (req, res) => {
     try {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid user id.", success: false });
-        }
-
-        // FIX: getActorContext is now synchronous.
-        const actor = getActorContext(req);
-        if (!actor) {
-            return res.status(401).json({ message: "User not authenticated", success: false });
         }
 
         const { reason } = req.body || {};
@@ -193,12 +181,6 @@ export const updateUserRole = async (req, res) => {
             return res.status(400).json({ message: "Invalid user id.", success: false });
         }
 
-        // FIX: getActorContext is now synchronous.
-        const actor = getActorContext(req);
-        if (!actor) {
-            return res.status(401).json({ message: "User not authenticated", success: false });
-        }
-
         const { role } = req.body;
         if (!["student", "recruiter", "admin"].includes(role)) {
             return res.status(400).json({ message: "Invalid role.", success: false });
@@ -236,11 +218,6 @@ export const deleteUser = async (req, res) => {
             return res.status(400).json({ message: "Invalid user id.", success: false });
         }
 
-        // FIX: getActorContext is now synchronous.
-        const actor = getActorContext(req);
-        if (!actor) {
-            return res.status(401).json({ message: "User not authenticated", success: false });
-        }
 
         if (String(req.params.id) === String(actor.actorId)) {
             return res.status(400).json({ message: "You cannot delete your own account here.", success: false });
@@ -377,12 +354,6 @@ export const resetRecruiterPassword = async (req, res) => {
             return res.status(400).json({ message: "Invalid company id.", success: false });
         }
 
-        // FIX: getActorContext is now synchronous.
-        const actor = getActorContext(req);
-        if (!actor) {
-            return res.status(401).json({ message: "User not authenticated", success: false });
-        }
-
         const company = await Company.findById(req.params.id);
         if (!company) return res.status(404).json({ message: "Company not found.", success: false });
 
@@ -443,12 +414,6 @@ export const setCompanyVerified = async (req, res) => {
             return res.status(400).json({ message: "Invalid company id.", success: false });
         }
 
-        // FIX: getActorContext is now synchronous.
-        const actor = getActorContext(req);
-        if (!actor) {
-            return res.status(401).json({ message: "User not authenticated", success: false });
-        }
-
         const existingCompany = await Company.findById(req.params.id).select("verified name");
         if (!existingCompany) return res.status(404).json({ message: "Company not found.", success: false });
 
@@ -492,12 +457,6 @@ export const deleteCompany = async (req, res) => {
     try {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid company id.", success: false });
-        }
-
-        // FIX: getActorContext is now synchronous.
-        const actor = getActorContext(req);
-        if (!actor) {
-            return res.status(401).json({ message: "User not authenticated", success: false });
         }
 
         const company = await Company.findByIdAndDelete(req.params.id).select("name userId");
@@ -565,12 +524,6 @@ export const deleteJob = async (req, res) => {
             return res.status(400).json({ message: "Invalid job id.", success: false });
         }
 
-        // FIX: getActorContext is now synchronous.
-        const actor = getActorContext(req);
-        if (!actor) {
-            return res.status(401).json({ message: "User not authenticated", success: false });
-        }
-
         const job = await Job.findByIdAndDelete(req.params.id).select("title company");
         if (!job) return res.status(404).json({ message: "Job not found.", success: false });
 
@@ -597,12 +550,6 @@ export const updateJobLifecycle = async (req, res) => {
     try {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid job id.", success: false });
-        }
-
-        // FIX: getActorContext is now synchronous.
-        const actor = getActorContext(req);
-        if (!actor) {
-            return res.status(401).json({ message: "User not authenticated", success: false });
         }
 
         const { status } = req.body || {};
@@ -721,12 +668,6 @@ export const deleteInternship = async (req, res) => {
     try {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid internship id.", success: false });
-        }
-
-        // FIX: getActorContext is now synchronous.
-        const actor = getActorContext(req);
-        if (!actor) {
-            return res.status(401).json({ message: "User not authenticated", success: false });
         }
 
         const internship = await Internship.findByIdAndDelete(req.params.id).select("title company");
