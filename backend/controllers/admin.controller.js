@@ -110,10 +110,10 @@ export const approveStudent = async (req, res) => {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid user id.", success: false });
         }
-        const actor = await getActorContext(req);
-        if (!actor) {
-            return res.status(401).json({ message: "User not authenticated", success: false });
-        }
+        // const actor = await getActorContext(req);
+        // if (!actor) {
+        //     return res.status(401).json({ message: "User not authenticated", success: false });
+        // }
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: "User not found.", success: false });
         if (user.role !== 'student') {
