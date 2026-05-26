@@ -12,26 +12,19 @@ import { recordAuditLog } from "../utils/audit.js";
 
 // Generate a human-readable but strong password (12 chars, mixed).
 const generatePassword = () => {
-    // 9 random bytes -> 12 base64 chars; strip ambiguous chars and ensure length.
     const raw = crypto.randomBytes(9).toString("base64");
     return raw.replace(/[+/=]/g, "x").slice(0, 12);
 };
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(String(id || ""));
 
-const getActorContext = async (req) => {
-    if (req.user?._id) {
-        return {
-            actorId: req.user._id,
-            actorRole: req.user.role || "admin",
-        };
-    }
-    if (!req.id || !isValidObjectId(req.id)) return null;
-    const actor = await User.findById(req.id).select("_id role");
-    if (!actor) return null;
+// FIX: Unified actor resolution — only relies on req.user (set by auth middleware).
+// Removed the broken req.id fallback which is not a standard Express property.
+const getActorContext = (req) => {
+    if (!req.user?._id) return null;
     return {
-        actorId: actor._id,
-        actorRole: actor.role || "admin",
+        actorId: req.user._id,
+        actorRole: req.user.role || "admin",
     };
 };
 
@@ -46,10 +39,10 @@ export const getStats = async (req, res) => {
             totalJobApplications, totalInternshipApplications,
         ] = await Promise.all([
             User.countDocuments(),
-            User.countDocuments({ role: 'student' }),
-            User.countDocuments({ role: 'recruiter' }),
-            User.countDocuments({ role: 'admin' }),
-            User.countDocuments({ role: 'student', status: 'pending' }),
+            User.countDocuments({ role: "student" }),
+            User.countDocuments({ role: "recruiter" }),
+            User.countDocuments({ role: "admin" }),
+            User.countDocuments({ role: "student", status: "pending" }),
             Company.countDocuments(),
             Company.countDocuments({ verified: true }),
             Job.countDocuments(),
@@ -77,7 +70,7 @@ export const getStats = async (req, res) => {
             success: true,
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -87,8 +80,8 @@ export const listUsers = async (req, res) => {
     try {
         const { role, q, status } = req.query;
         const filter = {};
-        if (role && ['student', 'recruiter', 'admin'].includes(role)) filter.role = role;
-        if (status && ['pending', 'approved', 'rejected'].includes(status)) filter.status = status;
+        if (role && ["student", "recruiter", "admin"].includes(role)) filter.role = role;
+        if (status && ["pending", "approved", "rejected"].includes(status)) filter.status = status;
         if (q) {
             filter.$or = [
                 { fullname: { $regex: q, $options: "i" } },
@@ -100,7 +93,7 @@ export const listUsers = async (req, res) => {
         const users = await User.find(filter).select("-password").sort({ createdAt: -1 });
         return res.status(200).json({ users, success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -108,42 +101,27 @@ export const listUsers = async (req, res) => {
 export const approveStudent = async (req, res) => {
     try {
         if (!isValidObjectId(req.params.id)) {
-            return res.status(400).json({
-                message: "Invalid user id.",
-                success: false
-            });
+            return res.status(400).json({ message: "Invalid user id.", success: false });
         }
 
-        const actor = await getActorContext(req);
-
+        // FIX: getActorContext is now synchronous — removed stale await.
+        const actor = getActorContext(req);
         if (!actor) {
-            return res.status(401).json({
-                message: "User not authenticated",
-                success: false
-            });
+            return res.status(401).json({ message: "User not authenticated", success: false });
         }
 
         const user = await User.findById(req.params.id);
-
         if (!user) {
-            return res.status(404).json({
-                message: "User not found.",
-                success: false
-            });
+            return res.status(404).json({ message: "User not found.", success: false });
         }
-
         if (user.role !== "student") {
-            return res.status(400).json({
-                message: "Only student accounts require approval.",
-                success: false
-            });
+            return res.status(400).json({ message: "Only student accounts require approval.", success: false });
         }
 
         user.status = "approved";
         user.approvedBy = actor.actorId;
         user.approvedAt = new Date();
         user.rejectionReason = "";
-
         await user.save();
 
         await recordAuditLog({
@@ -153,49 +131,43 @@ export const approveStudent = async (req, res) => {
             action: "student.approved",
             entityType: "User",
             entityId: user._id,
-            metadata: {
-                targetEmail: user.email,
-            },
+            metadata: { targetEmail: user.email },
         });
 
         const safe = user.toObject();
         delete safe.password;
-
-        return res.status(200).json({
-            message: "Student approved.",
-            user: safe,
-            success: true,
-        });
-
+        return res.status(200).json({ message: "Student approved.", user: safe, success: true });
     } catch (error) {
-        console.log(error);
-
-        return res.status(500).json({
-            message: error.message,
-            success: false,
-        });
+        console.error(error);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
+
 export const rejectStudent = async (req, res) => {
     try {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid user id.", success: false });
         }
-        const actor = await getActorContext(req);
+
+        // FIX: getActorContext is now synchronous.
+        const actor = getActorContext(req);
         if (!actor) {
             return res.status(401).json({ message: "User not authenticated", success: false });
         }
+
         const { reason } = req.body || {};
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: "User not found.", success: false });
-        if (user.role !== 'student') {
+        if (user.role !== "student") {
             return res.status(400).json({ message: "Only student accounts can be rejected here.", success: false });
         }
-        user.status = 'rejected';
+
+        user.status = "rejected";
         user.rejectionReason = reason ? String(reason).trim() : "";
         user.approvedBy = actor.actorId;
         user.approvedAt = new Date();
         await user.save();
+
         await recordAuditLog({
             req,
             actorId: actor.actorId,
@@ -205,11 +177,12 @@ export const rejectStudent = async (req, res) => {
             entityId: user._id,
             metadata: { targetEmail: user.email, reason: user.rejectionReason || null },
         });
+
         const safe = user.toObject();
         delete safe.password;
         return res.status(200).json({ message: "Student rejected.", user: safe, success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -219,30 +192,27 @@ export const updateUserRole = async (req, res) => {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid user id.", success: false });
         }
-        const actor = await getActorContext(req);
+
+        // FIX: getActorContext is now synchronous.
+        const actor = getActorContext(req);
         if (!actor) {
             return res.status(401).json({ message: "User not authenticated", success: false });
         }
+
         const { role } = req.body;
-        if (!['student', 'recruiter', 'admin'].includes(role)) {
+        if (!["student", "recruiter", "admin"].includes(role)) {
             return res.status(400).json({ message: "Invalid role.", success: false });
         }
-        // Prevent an admin from demoting themselves accidentally.
-        if (req.params.id === String(actor.actorId) && role !== 'admin') {
-            return res.status(400).json({
-                message: "You cannot change your own admin role.",
-                success: false,
-            });
+        if (String(req.params.id) === String(actor.actorId) && role !== "admin") {
+            return res.status(400).json({ message: "You cannot change your own admin role.", success: false });
         }
+
         const existingUser = await User.findById(req.params.id).select("role email");
         if (!existingUser) return res.status(404).json({ message: "User not found.", success: false });
 
-        const user = await User.findByIdAndUpdate(
-            req.params.id,
-            { role },
-            { new: true }
-        ).select("-password");
+        const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true }).select("-password");
         if (!user) return res.status(404).json({ message: "User not found.", success: false });
+
         await recordAuditLog({
             req,
             actorId: actor.actorId,
@@ -252,9 +222,10 @@ export const updateUserRole = async (req, res) => {
             entityId: user._id,
             metadata: { targetEmail: user.email, previousRole: existingUser.role, nextRole: role },
         });
+
         return res.status(200).json({ message: "User role updated.", user, success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -264,18 +235,20 @@ export const deleteUser = async (req, res) => {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid user id.", success: false });
         }
-        const actor = await getActorContext(req);
+
+        // FIX: getActorContext is now synchronous.
+        const actor = getActorContext(req);
         if (!actor) {
             return res.status(401).json({ message: "User not authenticated", success: false });
         }
-        if (req.params.id === String(actor.actorId)) {
-            return res.status(400).json({
-                message: "You cannot delete your own account here.",
-                success: false,
-            });
+
+        if (String(req.params.id) === String(actor.actorId)) {
+            return res.status(400).json({ message: "You cannot delete your own account here.", success: false });
         }
+
         const user = await User.findByIdAndDelete(req.params.id).select("email role");
         if (!user) return res.status(404).json({ message: "User not found.", success: false });
+
         await recordAuditLog({
             req,
             actorId: actor.actorId,
@@ -285,28 +258,27 @@ export const deleteUser = async (req, res) => {
             entityId: user._id,
             metadata: { targetEmail: user.email, targetRole: user.role },
         });
+
         return res.status(200).json({ message: "User deleted.", success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
 
 // ============ COMPANIES ============
 
-// Admin-only: create a Company AND its dedicated recruiter User in one go.
-// Returns the generated password ONCE in the response — admin must copy it.
 export const createCompanyWithRecruiter = async (req, res) => {
     try {
-        const actor = await getActorContext(req);
+        // FIX: getActorContext is now synchronous.
+        const actor = getActorContext(req);
         if (!actor) {
             return res.status(401).json({ message: "User not authenticated", success: false });
         }
+
         const {
-            // company fields
             name, description, website, location, industry,
             companyType, country, culture,
-            // recruiter fields
             recruiterFullname, recruiterEmail, recruiterPhone,
         } = req.body;
 
@@ -344,7 +316,7 @@ export const createCompanyWithRecruiter = async (req, res) => {
         const industries = Array.isArray(industry)
             ? industry
             : (typeof industry === "string" && industry.trim())
-                ? industry.split(",").map(s => s.trim()).filter(Boolean)
+                ? industry.split(",").map((s) => s.trim()).filter(Boolean)
                 : [];
 
         const company = await Company.create({
@@ -362,10 +334,12 @@ export const createCompanyWithRecruiter = async (req, res) => {
             verifiedBy: actor.actorId,
         });
 
-        // Link recruiter to company on the user profile too.
+        // FIX: Use markModified so Mongoose tracks the nested profile change.
         recruiter.profile = recruiter.profile || {};
         recruiter.profile.company = company._id;
+        recruiter.markModified("profile");
         await recruiter.save();
+
         await recordAuditLog({
             req,
             actorId: actor.actorId,
@@ -377,7 +351,8 @@ export const createCompanyWithRecruiter = async (req, res) => {
         });
 
         return res.status(201).json({
-            message: "Company and recruiter account created. Share these credentials with the recruiter — the password will not be shown again.",
+            message:
+                "Company and recruiter account created. Share these credentials with the recruiter — the password will not be shown again.",
             company,
             recruiter: {
                 _id: recruiter._id,
@@ -391,21 +366,23 @@ export const createCompanyWithRecruiter = async (req, res) => {
             success: true,
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
 
-// Admin-only: reset the recruiter's password for a given company.
 export const resetRecruiterPassword = async (req, res) => {
     try {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid company id.", success: false });
         }
-        const actor = await getActorContext(req);
+
+        // FIX: getActorContext is now synchronous.
+        const actor = getActorContext(req);
         if (!actor) {
             return res.status(401).json({ message: "User not authenticated", success: false });
         }
+
         const company = await Company.findById(req.params.id);
         if (!company) return res.status(404).json({ message: "Company not found.", success: false });
 
@@ -417,6 +394,7 @@ export const resetRecruiterPassword = async (req, res) => {
         const generatedPassword = generatePassword();
         recruiter.password = await bcrypt.hash(generatedPassword, 10);
         await recruiter.save();
+
         await recordAuditLog({
             req,
             actorId: actor.actorId,
@@ -436,7 +414,7 @@ export const resetRecruiterPassword = async (req, res) => {
             success: true,
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -445,8 +423,8 @@ export const listCompanies = async (req, res) => {
     try {
         const { verified, q } = req.query;
         const filter = {};
-        if (verified === 'true') filter.verified = true;
-        if (verified === 'false') filter.verified = false;
+        if (verified === "true") filter.verified = true;
+        if (verified === "false") filter.verified = false;
         if (q) filter.name = { $regex: q, $options: "i" };
 
         const companies = await Company.find(filter)
@@ -454,7 +432,7 @@ export const listCompanies = async (req, res) => {
             .sort({ createdAt: -1 });
         return res.status(200).json({ companies, success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -464,23 +442,27 @@ export const setCompanyVerified = async (req, res) => {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid company id.", success: false });
         }
-        const actor = await getActorContext(req);
+
+        // FIX: getActorContext is now synchronous.
+        const actor = getActorContext(req);
         if (!actor) {
             return res.status(401).json({ message: "User not authenticated", success: false });
         }
-        const { verified } = req.body;
+
         const existingCompany = await Company.findById(req.params.id).select("verified name");
         if (!existingCompany) return res.status(404).json({ message: "Company not found.", success: false });
-        const company = await Company.findByIdAndUpdate(
-            req.params.id,
-            {
-                verified: !!verified,
-                verifiedAt: verified ? new Date() : null,
-                verifiedBy: verified ? actor.actorId : null,
-            },
-            { new: true }
-        );
+
+        const { verified } = req.body;
+
+        // FIX: Use $unset for null fields instead of setting them to null/undefined,
+        // which can cause issues with strict Mongoose schemas.
+        const updatePayload = verified
+            ? { verified: true, verifiedAt: new Date(), verifiedBy: actor.actorId }
+            : { verified: false, $unset: { verifiedAt: "", verifiedBy: "" } };
+
+        const company = await Company.findByIdAndUpdate(req.params.id, updatePayload, { new: true });
         if (!company) return res.status(404).json({ message: "Company not found.", success: false });
+
         await recordAuditLog({
             req,
             actorId: actor.actorId,
@@ -488,15 +470,20 @@ export const setCompanyVerified = async (req, res) => {
             action: "company.verification_updated",
             entityType: "Company",
             entityId: company._id,
-            metadata: { companyName: company.name, previousVerified: existingCompany.verified, nextVerified: !!verified },
+            metadata: {
+                companyName: company.name,
+                previousVerified: existingCompany.verified,
+                nextVerified: !!verified,
+            },
         });
+
         return res.status(200).json({
             message: verified ? "Company approved." : "Company verification revoked.",
             company,
             success: true,
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -506,18 +493,23 @@ export const deleteCompany = async (req, res) => {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid company id.", success: false });
         }
-        const actor = await getActorContext(req);
+
+        // FIX: getActorContext is now synchronous.
+        const actor = getActorContext(req);
         if (!actor) {
             return res.status(401).json({ message: "User not authenticated", success: false });
         }
+
         const company = await Company.findByIdAndDelete(req.params.id).select("name userId");
         if (!company) return res.status(404).json({ message: "Company not found.", success: false });
 
         // Cascade: delete jobs, internships, and their applications for this company.
-        const jobs = await Job.find({ company: req.params.id }, { _id: 1 });
-        const jobIds = jobs.map(j => j._id);
-        const internships = await Internship.find({ company: req.params.id }, { _id: 1 });
-        const internshipIds = internships.map(i => i._id);
+        const [jobs, internships] = await Promise.all([
+            Job.find({ company: req.params.id }, { _id: 1 }),
+            Internship.find({ company: req.params.id }, { _id: 1 }),
+        ]);
+        const jobIds = jobs.map((j) => j._id);
+        const internshipIds = internships.map((i) => i._id);
 
         await Promise.all([
             Application.deleteMany({ job: { $in: jobIds } }),
@@ -525,6 +517,7 @@ export const deleteCompany = async (req, res) => {
             InternshipApplication.deleteMany({ internship: { $in: internshipIds } }),
             Internship.deleteMany({ company: req.params.id }),
         ]);
+
         await recordAuditLog({
             req,
             actorId: actor.actorId,
@@ -541,7 +534,7 @@ export const deleteCompany = async (req, res) => {
 
         return res.status(200).json({ message: "Company and related listings deleted.", success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -561,7 +554,7 @@ export const listJobs = async (req, res) => {
             .sort({ createdAt: -1 });
         return res.status(200).json({ jobs, success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -571,13 +564,18 @@ export const deleteJob = async (req, res) => {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid job id.", success: false });
         }
-        const actor = await getActorContext(req);
+
+        // FIX: getActorContext is now synchronous.
+        const actor = getActorContext(req);
         if (!actor) {
             return res.status(401).json({ message: "User not authenticated", success: false });
         }
+
         const job = await Job.findByIdAndDelete(req.params.id).select("title company");
         if (!job) return res.status(404).json({ message: "Job not found.", success: false });
+
         await Application.deleteMany({ job: req.params.id });
+
         await recordAuditLog({
             req,
             actorId: actor.actorId,
@@ -587,9 +585,10 @@ export const deleteJob = async (req, res) => {
             entityId: job._id,
             metadata: { jobTitle: job.title },
         });
+
         return res.status(200).json({ message: "Job deleted.", success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -599,10 +598,13 @@ export const updateJobLifecycle = async (req, res) => {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid job id.", success: false });
         }
-        const actor = await getActorContext(req);
+
+        // FIX: getActorContext is now synchronous.
+        const actor = getActorContext(req);
         if (!actor) {
             return res.status(401).json({ message: "User not authenticated", success: false });
         }
+
         const { status } = req.body || {};
         if (!["open", "closed", "archived"].includes(String(status))) {
             return res.status(400).json({ message: "Invalid status.", success: false });
@@ -612,18 +614,27 @@ export const updateJobLifecycle = async (req, res) => {
         if (!job) return res.status(404).json({ message: "Job not found.", success: false });
 
         const previousStatus = job.status;
-        job.status = status;
+
+        // FIX: Use $unset operator for date fields so MongoDB actually removes them
+        // instead of setting undefined which Mongoose silently ignores.
+        let updateOp;
         if (status === "closed") {
-            job.closedAt = new Date();
-            job.archivedAt = undefined;
+            updateOp = { $set: { status: "closed", closedAt: new Date() }, $unset: { archivedAt: "" } };
         } else if (status === "archived") {
-            job.archivedAt = new Date();
-            if (!job.closedAt) job.closedAt = new Date();
+            updateOp = {
+                $set: {
+                    status: "archived",
+                    archivedAt: new Date(),
+                    // Only set closedAt if not already set
+                    ...(job.closedAt ? {} : { closedAt: new Date() }),
+                },
+            };
         } else {
-            job.closedAt = undefined;
-            job.archivedAt = undefined;
+            // open
+            updateOp = { $set: { status: "open" }, $unset: { closedAt: "", archivedAt: "" } };
         }
-        await job.save();
+
+        const updatedJob = await Job.findByIdAndUpdate(req.params.id, updateOp, { new: true });
 
         await recordAuditLog({
             req,
@@ -635,13 +646,9 @@ export const updateJobLifecycle = async (req, res) => {
             metadata: { jobTitle: job.title, previousStatus, nextStatus: status },
         });
 
-        return res.status(200).json({
-            message: `Job moved to ${status}.`,
-            job,
-            success: true,
-        });
+        return res.status(200).json({ message: `Job moved to ${status}.`, job: updatedJob, success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -656,10 +663,12 @@ export const listAuditLogs = async (req, res) => {
         if (action) filter.action = String(action);
         if (entityType) filter.entityType = String(entityType);
         if (q) {
+            // FIX: Removed entityId from $regex search — it is an ObjectId in MongoDB
+            // and regex queries against ObjectId fields throw a CastError.
+            // All other string fields are safe to search.
             filter.$or = [
                 { action: { $regex: q, $options: "i" } },
                 { entityType: { $regex: q, $options: "i" } },
-                { entityId: { $regex: q, $options: "i" } },
                 { "metadata.companyName": { $regex: q, $options: "i" } },
                 { "metadata.targetEmail": { $regex: q, $options: "i" } },
                 { "metadata.jobTitle": { $regex: q, $options: "i" } },
@@ -686,7 +695,7 @@ export const listAuditLogs = async (req, res) => {
             success: true,
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -703,7 +712,7 @@ export const listInternships = async (req, res) => {
             .sort({ createdAt: -1 });
         return res.status(200).json({ internships, success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -713,13 +722,18 @@ export const deleteInternship = async (req, res) => {
         if (!isValidObjectId(req.params.id)) {
             return res.status(400).json({ message: "Invalid internship id.", success: false });
         }
-        const actor = await getActorContext(req);
+
+        // FIX: getActorContext is now synchronous.
+        const actor = getActorContext(req);
         if (!actor) {
             return res.status(401).json({ message: "User not authenticated", success: false });
         }
+
         const internship = await Internship.findByIdAndDelete(req.params.id).select("title company");
         if (!internship) return res.status(404).json({ message: "Internship not found.", success: false });
+
         await InternshipApplication.deleteMany({ internship: req.params.id });
+
         await recordAuditLog({
             req,
             actorId: actor.actorId,
@@ -729,9 +743,10 @@ export const deleteInternship = async (req, res) => {
             entityId: internship._id,
             metadata: { internshipTitle: internship.title },
         });
+
         return res.status(200).json({ message: "Internship deleted.", success: true });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
