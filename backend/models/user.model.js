@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
+        select: false,
     },
     role: {
         type: String,
@@ -103,12 +104,24 @@ const userSchema = new mongoose.Schema({
     }],
     passwordResetTokenHash: {
         type: String,
-        default: ""
+        default: "",
+        select: false,
     },
     passwordResetExpiresAt: {
-        type: Date
+        type: Date,
+        select: false,
     }
 }, { timestamps: true });
+
+const hideSensitiveFields = (_doc, ret) => {
+    delete ret.password;
+    delete ret.passwordResetTokenHash;
+    delete ret.passwordResetExpiresAt;
+    return ret;
+};
+
+userSchema.set("toJSON", { transform: hideSensitiveFields });
+userSchema.set("toObject", { transform: hideSensitiveFields });
 
 userSchema.methods.calculateProfileCompletion = function () {
     let score = 0;

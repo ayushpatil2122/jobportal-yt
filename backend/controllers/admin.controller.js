@@ -7,6 +7,7 @@ import { InternshipApplication } from "../models/internshipApplication.model.js"
 import { AuditLog } from "../models/auditLog.model.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import mongoose from "mongoose";
 import { recordAuditLog } from "../utils/audit.js";
 
 // Generate a human-readable but strong password (12 chars, mixed).
@@ -14,6 +15,24 @@ const generatePassword = () => {
     // 9 random bytes -> 12 base64 chars; strip ambiguous chars and ensure length.
     const raw = crypto.randomBytes(9).toString("base64");
     return raw.replace(/[+/=]/g, "x").slice(0, 12);
+};
+
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(String(id || ""));
+
+const getActorContext = async (req) => {
+    if (req.user?._id) {
+        return {
+            actorId: req.user._id,
+            actorRole: req.user.role || "admin",
+        };
+    }
+    if (!req.id || !isValidObjectId(req.id)) return null;
+    const actor = await User.findById(req.id).select("_id role");
+    if (!actor) return null;
+    return {
+        actorId: actor._id,
+        actorRole: actor.role || "admin",
+    };
 };
 
 // ============ STATS ============
@@ -88,20 +107,27 @@ export const listUsers = async (req, res) => {
 
 export const approveStudent = async (req, res) => {
     try {
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: "Invalid user id.", success: false });
+        }
+        const actor = await getActorContext(req);
+        if (!actor) {
+            return res.status(401).json({ message: "User not authenticated", success: false });
+        }
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: "User not found.", success: false });
         if (user.role !== 'student') {
             return res.status(400).json({ message: "Only student accounts require approval.", success: false });
         }
         user.status = 'approved';
-        user.approvedBy = req.user._id;
+        user.approvedBy = actor.actorId;
         user.approvedAt = new Date();
         user.rejectionReason = "";
         await user.save();
         await recordAuditLog({
             req,
-            actorId: req.user._id,
-            actorRole: req.user.role,
+            actorId: actor.actorId,
+            actorRole: actor.actorRole,
             action: "student.approved",
             entityType: "User",
             entityId: user._id,
@@ -118,6 +144,13 @@ export const approveStudent = async (req, res) => {
 
 export const rejectStudent = async (req, res) => {
     try {
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: "Invalid user id.", success: false });
+        }
+        const actor = await getActorContext(req);
+        if (!actor) {
+            return res.status(401).json({ message: "User not authenticated", success: false });
+        }
         const { reason } = req.body || {};
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: "User not found.", success: false });
@@ -126,13 +159,13 @@ export const rejectStudent = async (req, res) => {
         }
         user.status = 'rejected';
         user.rejectionReason = reason ? String(reason).trim() : "";
-        user.approvedBy = req.user._id;
+        user.approvedBy = actor.actorId;
         user.approvedAt = new Date();
         await user.save();
         await recordAuditLog({
             req,
-            actorId: req.user._id,
-            actorRole: req.user.role,
+            actorId: actor.actorId,
+            actorRole: actor.actorRole,
             action: "student.rejected",
             entityType: "User",
             entityId: user._id,
@@ -149,12 +182,19 @@ export const rejectStudent = async (req, res) => {
 
 export const updateUserRole = async (req, res) => {
     try {
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: "Invalid user id.", success: false });
+        }
+        const actor = await getActorContext(req);
+        if (!actor) {
+            return res.status(401).json({ message: "User not authenticated", success: false });
+        }
         const { role } = req.body;
         if (!['student', 'recruiter', 'admin'].includes(role)) {
             return res.status(400).json({ message: "Invalid role.", success: false });
         }
         // Prevent an admin from demoting themselves accidentally.
-        if (req.params.id === String(req.user._id) && role !== 'admin') {
+        if (req.params.id === String(actor.actorId) && role !== 'admin') {
             return res.status(400).json({
                 message: "You cannot change your own admin role.",
                 success: false,
@@ -171,8 +211,8 @@ export const updateUserRole = async (req, res) => {
         if (!user) return res.status(404).json({ message: "User not found.", success: false });
         await recordAuditLog({
             req,
-            actorId: req.user._id,
-            actorRole: req.user.role,
+            actorId: actor.actorId,
+            actorRole: actor.actorRole,
             action: "user.role_updated",
             entityType: "User",
             entityId: user._id,
@@ -187,7 +227,14 @@ export const updateUserRole = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
     try {
-        if (req.params.id === String(req.user._id)) {
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: "Invalid user id.", success: false });
+        }
+        const actor = await getActorContext(req);
+        if (!actor) {
+            return res.status(401).json({ message: "User not authenticated", success: false });
+        }
+        if (req.params.id === String(actor.actorId)) {
             return res.status(400).json({
                 message: "You cannot delete your own account here.",
                 success: false,
@@ -197,8 +244,8 @@ export const deleteUser = async (req, res) => {
         if (!user) return res.status(404).json({ message: "User not found.", success: false });
         await recordAuditLog({
             req,
-            actorId: req.user._id,
-            actorRole: req.user.role,
+            actorId: actor.actorId,
+            actorRole: actor.actorRole,
             action: "user.deleted",
             entityType: "User",
             entityId: user._id,
@@ -217,6 +264,10 @@ export const deleteUser = async (req, res) => {
 // Returns the generated password ONCE in the response — admin must copy it.
 export const createCompanyWithRecruiter = async (req, res) => {
     try {
+        const actor = await getActorContext(req);
+        if (!actor) {
+            return res.status(401).json({ message: "User not authenticated", success: false });
+        }
         const {
             // company fields
             name, description, website, location, industry,
@@ -274,7 +325,7 @@ export const createCompanyWithRecruiter = async (req, res) => {
             userId: recruiter._id,
             verified: true,
             verifiedAt: new Date(),
-            verifiedBy: req.user._id,
+            verifiedBy: actor.actorId,
         });
 
         // Link recruiter to company on the user profile too.
@@ -283,8 +334,8 @@ export const createCompanyWithRecruiter = async (req, res) => {
         await recruiter.save();
         await recordAuditLog({
             req,
-            actorId: req.user._id,
-            actorRole: req.user.role,
+            actorId: actor.actorId,
+            actorRole: actor.actorRole,
             action: "company.created_with_recruiter",
             entityType: "Company",
             entityId: company._id,
@@ -314,6 +365,13 @@ export const createCompanyWithRecruiter = async (req, res) => {
 // Admin-only: reset the recruiter's password for a given company.
 export const resetRecruiterPassword = async (req, res) => {
     try {
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: "Invalid company id.", success: false });
+        }
+        const actor = await getActorContext(req);
+        if (!actor) {
+            return res.status(401).json({ message: "User not authenticated", success: false });
+        }
         const company = await Company.findById(req.params.id);
         if (!company) return res.status(404).json({ message: "Company not found.", success: false });
 
@@ -327,8 +385,8 @@ export const resetRecruiterPassword = async (req, res) => {
         await recruiter.save();
         await recordAuditLog({
             req,
-            actorId: req.user._id,
-            actorRole: req.user.role,
+            actorId: actor.actorId,
+            actorRole: actor.actorRole,
             action: "recruiter.password_reset",
             entityType: "Company",
             entityId: company._id,
@@ -369,6 +427,13 @@ export const listCompanies = async (req, res) => {
 
 export const setCompanyVerified = async (req, res) => {
     try {
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: "Invalid company id.", success: false });
+        }
+        const actor = await getActorContext(req);
+        if (!actor) {
+            return res.status(401).json({ message: "User not authenticated", success: false });
+        }
         const { verified } = req.body;
         const existingCompany = await Company.findById(req.params.id).select("verified name");
         if (!existingCompany) return res.status(404).json({ message: "Company not found.", success: false });
@@ -377,15 +442,15 @@ export const setCompanyVerified = async (req, res) => {
             {
                 verified: !!verified,
                 verifiedAt: verified ? new Date() : null,
-                verifiedBy: verified ? req.user._id : null,
+                verifiedBy: verified ? actor.actorId : null,
             },
             { new: true }
         );
         if (!company) return res.status(404).json({ message: "Company not found.", success: false });
         await recordAuditLog({
             req,
-            actorId: req.user._id,
-            actorRole: req.user.role,
+            actorId: actor.actorId,
+            actorRole: actor.actorRole,
             action: "company.verification_updated",
             entityType: "Company",
             entityId: company._id,
@@ -404,6 +469,13 @@ export const setCompanyVerified = async (req, res) => {
 
 export const deleteCompany = async (req, res) => {
     try {
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: "Invalid company id.", success: false });
+        }
+        const actor = await getActorContext(req);
+        if (!actor) {
+            return res.status(401).json({ message: "User not authenticated", success: false });
+        }
         const company = await Company.findByIdAndDelete(req.params.id).select("name userId");
         if (!company) return res.status(404).json({ message: "Company not found.", success: false });
 
@@ -421,8 +493,8 @@ export const deleteCompany = async (req, res) => {
         ]);
         await recordAuditLog({
             req,
-            actorId: req.user._id,
-            actorRole: req.user.role,
+            actorId: actor.actorId,
+            actorRole: actor.actorRole,
             action: "company.deleted",
             entityType: "Company",
             entityId: company._id,
@@ -462,13 +534,20 @@ export const listJobs = async (req, res) => {
 
 export const deleteJob = async (req, res) => {
     try {
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: "Invalid job id.", success: false });
+        }
+        const actor = await getActorContext(req);
+        if (!actor) {
+            return res.status(401).json({ message: "User not authenticated", success: false });
+        }
         const job = await Job.findByIdAndDelete(req.params.id).select("title company");
         if (!job) return res.status(404).json({ message: "Job not found.", success: false });
         await Application.deleteMany({ job: req.params.id });
         await recordAuditLog({
             req,
-            actorId: req.user._id,
-            actorRole: req.user.role,
+            actorId: actor.actorId,
+            actorRole: actor.actorRole,
             action: "job.deleted",
             entityType: "Job",
             entityId: job._id,
@@ -483,6 +562,13 @@ export const deleteJob = async (req, res) => {
 
 export const updateJobLifecycle = async (req, res) => {
     try {
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: "Invalid job id.", success: false });
+        }
+        const actor = await getActorContext(req);
+        if (!actor) {
+            return res.status(401).json({ message: "User not authenticated", success: false });
+        }
         const { status } = req.body || {};
         if (!["open", "closed", "archived"].includes(String(status))) {
             return res.status(400).json({ message: "Invalid status.", success: false });
@@ -507,8 +593,8 @@ export const updateJobLifecycle = async (req, res) => {
 
         await recordAuditLog({
             req,
-            actorId: req.user._id,
-            actorRole: req.user.role,
+            actorId: actor.actorId,
+            actorRole: actor.actorRole,
             action: "job.lifecycle_updated",
             entityType: "Job",
             entityId: job._id,
@@ -590,13 +676,20 @@ export const listInternships = async (req, res) => {
 
 export const deleteInternship = async (req, res) => {
     try {
+        if (!isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: "Invalid internship id.", success: false });
+        }
+        const actor = await getActorContext(req);
+        if (!actor) {
+            return res.status(401).json({ message: "User not authenticated", success: false });
+        }
         const internship = await Internship.findByIdAndDelete(req.params.id).select("title company");
         if (!internship) return res.status(404).json({ message: "Internship not found.", success: false });
         await InternshipApplication.deleteMany({ internship: req.params.id });
         await recordAuditLog({
             req,
-            actorId: req.user._id,
-            actorRole: req.user.role,
+            actorId: actor.actorId,
+            actorRole: actor.actorRole,
             action: "internship.deleted",
             entityType: "Internship",
             entityId: internship._id,

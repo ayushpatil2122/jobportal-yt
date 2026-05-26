@@ -81,6 +81,17 @@ const uploadResumeFile = async (req, file) => {
     }
 };
 
+const getAuthCookieOptions = () => {
+    const isProd = process.env.NODE_ENV === "production";
+    return {
+        maxAge: 1 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: isProd ? "none" : "lax",
+        secure: isProd,
+        path: "/",
+    };
+};
+
 export const register = async (req, res) => {
     try {
         const { fullname, email, phoneNumber, password, role, adminCode, college, rollNumber } = req.body;
@@ -182,7 +193,7 @@ export const login = async (req, res) => {
             return res.status(400).json({ message: "Something is missing", success: false });
         }
 
-        let user = await User.findOne({ email: normalizedEmail });
+        let user = await User.findOne({ email: normalizedEmail }).select("+password");
         if (!user) {
             return res.status(400).json({ message: "Incorrect email or password.", success: false });
         }
@@ -239,14 +250,8 @@ export const login = async (req, res) => {
             notifications: user.notifications,
         };
 
-        const isProd = process.env.NODE_ENV === "production";
         return res.status(200)
-            .cookie("token", token, {
-                maxAge: 1 * 24 * 60 * 60 * 1000,
-                httpOnly: true,
-                sameSite: isProd ? "none" : "lax",
-                secure: isProd,
-            })
+            .cookie("token", token, getAuthCookieOptions())
             .json({ message: `Welcome back ${user.fullname}`, user, success: true });
     } catch (error) {
         console.log(error);
@@ -363,13 +368,11 @@ export const resetPassword = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
-        const isProd = process.env.NODE_ENV === "production";
+        const clearOptions = getAuthCookieOptions();
         return res.status(200)
             .cookie("token", "", {
+                ...clearOptions,
                 maxAge: 0,
-                httpOnly: true,
-                sameSite: isProd ? "none" : "lax",
-                secure: isProd,
             })
             .json({ message: "Logged out successfully.", success: true });
     } catch (error) {
