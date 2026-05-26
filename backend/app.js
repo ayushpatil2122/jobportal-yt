@@ -19,6 +19,7 @@ import adminRoute from "./routes/admin.route.js";
 import { notFound, errorHandler } from "./middlewares/errorHandler.js";
 import { requestContext } from "./middlewares/requestContext.js";
 import { validatePayload } from "./middlewares/validatePayload.js";
+import { csrfGuard } from "./middlewares/csrfGuard.js";
 
 dotenv.config();
 
@@ -77,9 +78,20 @@ app.use(
             if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
             return cb(new Error(`CORS blocked: ${origin}`));
         },
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Request-Id"],
         credentials: true,
     })
 );
+
+app.use(csrfGuard({ allowedOrigins }));
+
+app.use("/api/v1", (_req, res, next) => {
+    // API responses should not be cached by browsers/proxies.
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("Pragma", "no-cache");
+    next();
+});
 
 app.use(
     "/uploads",

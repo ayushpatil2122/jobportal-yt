@@ -154,10 +154,12 @@ const LandingPage = () => {
                         ))}
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <LanguageSwitcher lang={lang} onToggle={handleLangToggle} />
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="hidden sm:block">
+                            <LanguageSwitcher lang={lang} onToggle={handleLangToggle} />
+                        </div>
                         {user ? (
-                            <Link to="/dashboard" className="px-5 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/25">
+                            <Link to="/dashboard" className="hidden sm:inline-flex px-5 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/25">
                                 {t('nav.dashboard')}
                             </Link>
                         ) : (
@@ -168,7 +170,7 @@ const LandingPage = () => {
                                 <Link to="/login" className="hidden sm:block px-4 py-2 text-foreground rounded-lg text-sm font-medium hover:bg-white/5 transition-colors">
                                     {t('nav.login')}
                                 </Link>
-                                <Link to="/signup" className="px-5 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40">
+                                <Link to="/signup" className="hidden sm:inline-flex px-5 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40">
                                     {t('nav.getStarted')}
                                 </Link>
                             </>
@@ -185,6 +187,23 @@ const LandingPage = () => {
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                             className="lg:hidden bg-background/95 backdrop-blur-xl border-b border-border">
                             <div className="px-4 py-4 space-y-1">
+                                {user ? (
+                                    <Link to="/dashboard" onClick={() => setMobileMenu(false)}
+                                        className="block px-4 py-3 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-all mb-2">
+                                        {t('nav.dashboard')}
+                                    </Link>
+                                ) : (
+                                    <div className="grid grid-cols-1 gap-2 mb-2">
+                                        <Link to="/signup" onClick={() => setMobileMenu(false)}
+                                            className="block px-4 py-3 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-all text-center">
+                                            {t('nav.getStarted')}
+                                        </Link>
+                                        <Link to="/login" onClick={() => setMobileMenu(false)}
+                                            className="block px-4 py-3 text-sm font-medium text-foreground rounded-lg border border-border hover:bg-white/5 transition-all text-center">
+                                            {t('nav.login')}
+                                        </Link>
+                                    </div>
+                                )}
                                 {navLinks.map(link => (
                                     <a key={link.href} href={link.href} onClick={() => setMobileMenu(false)}
                                         className="block px-4 py-3 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-white/5 transition-all">
@@ -217,7 +236,7 @@ const LandingPage = () => {
                 <div className="max-w-7xl mx-auto relative z-10 w-full">
                     <motion.div initial="hidden" animate="visible" variants={stagger} className="text-center max-w-5xl mx-auto">
                         <motion.div variants={fadeUp} custom={0}
-                            className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-semibold mb-10 tracking-wider">
+                            className="inline-flex flex-wrap justify-center items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[10px] sm:text-xs font-semibold mb-10 tracking-wider">
                             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse-soft" />
                             <span className="text-muted-foreground">{t('hero.badge_from')}</span>
                             <ArrowRight size={12} className="text-primary" />
@@ -759,7 +778,7 @@ const LandingPage = () => {
                                     </div>
                                     <div>
                                         <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('contact.email_label')}</p>
-                                        <p className="text-sm text-foreground font-medium group-hover/link:text-primary transition-colors">{t('contact.email_value')}</p>
+                                        <p className="text-sm text-foreground font-medium group-hover/link:text-primary transition-colors break-all">{t('contact.email_value')}</p>
                                     </div>
                                 </a>
                             </motion.div>
