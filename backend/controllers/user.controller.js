@@ -6,6 +6,7 @@ import { uploadBufferToCloudinary } from "../utils/cloudinary.js";
 import { saveFileLocally, toPublicFileUrl } from "../utils/fileStorage.js";
 import { sendEmail } from "../utils/mailer.js";
 import { logger } from "../utils/logger.js";
+import { logControllerError } from "../utils/controllerError.js";
 
 const MAX_PROFILE_PHOTO_BYTES = 2 * 1024 * 1024;
 const MAX_RESUME_BYTES = 5 * 1024 * 1024;
@@ -179,7 +180,7 @@ export const register = async (req, res) => {
 
         return res.status(201).json({ message: successMessage, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("user_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -254,7 +255,7 @@ export const login = async (req, res) => {
             .cookie("token", token, getAuthCookieOptions())
             .json({ message: `Welcome back ${user.fullname}`, user, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("user_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -454,7 +455,7 @@ export const updateProfile = async (req, res) => {
 
         return res.status(200).json({ message: "Profile updated successfully.", user, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("user_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -492,7 +493,7 @@ export const updateProfilePhoto = async (req, res) => {
             success: true
         });
     } catch (error) {
-        console.log(error);
+        logControllerError("user_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -544,7 +545,7 @@ export const addResume = async (req, res) => {
             success: true
         });
     } catch (error) {
-        console.log(error);
+        logControllerError("user_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -564,7 +565,7 @@ export const deleteResume = async (req, res) => {
 
         return res.status(200).json({ message: "Resume deleted.", resumes: user.profile.resumes, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("user_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -581,7 +582,7 @@ export const getNotifications = async (req, res) => {
         const sorted = user.notifications.sort((a, b) => b.createdAt - a.createdAt);
         return res.status(200).json({ notifications: sorted, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("user_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -600,7 +601,7 @@ export const markNotificationRead = async (req, res) => {
 
         return res.status(200).json({ message: "Notifications marked as read.", success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("user_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -638,7 +639,7 @@ export const getDashboardStats = async (req, res) => {
             success: true
         });
     } catch (error) {
-        console.log(error);
+        logControllerError("user_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };

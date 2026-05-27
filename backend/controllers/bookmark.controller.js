@@ -1,4 +1,5 @@
 import { User } from "../models/user.model.js";
+import { logControllerError } from "../utils/controllerError.js";
 
 export const toggleBookmark = async (req, res) => {
     try {
@@ -21,7 +22,7 @@ export const toggleBookmark = async (req, res) => {
             return res.status(200).json({ message: "Bookmark added.", bookmarked: true, success: true });
         }
     } catch (error) {
-        console.log(error);
+        logControllerError("bookmark_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -40,7 +41,7 @@ export const getBookmarkedJobs = async (req, res) => {
 
         return res.status(200).json({ bookmarkedJobs: user.bookmarkedJobs, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("bookmark_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };

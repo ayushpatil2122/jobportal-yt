@@ -1,4 +1,5 @@
 import { InterviewInvite } from "../models/interviewInvite.model.js";
+import { logControllerError } from "../utils/controllerError.js";
 
 export const createInterview = async (req, res) => {
     try {
@@ -23,7 +24,7 @@ export const createInterview = async (req, res) => {
 
         return res.status(201).json({ message: "Interview scheduled successfully.", interview, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("interview_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -53,7 +54,7 @@ export const getMyInterviews = async (req, res) => {
 
         return res.status(200).json({ upcoming, past, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("interview_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -73,7 +74,7 @@ export const updateInterviewStatus = async (req, res) => {
 
         return res.status(200).json({ message: "Interview status updated.", interview, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("interview_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };

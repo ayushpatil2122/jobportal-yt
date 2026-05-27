@@ -23,11 +23,16 @@ export const recordAuditLog = async ({
             metadata,
         });
     } catch (error) {
+        // Never let audit-log persistence break the main flow. Surface enough
+        // context in the log so we can debug from Render without guessing.
         logger.error("audit_log_failed", {
             action,
             entityType,
-            entityId,
+            entityId: String(entityId || ""),
+            actorId: String(actorId || ""),
             error: error?.message,
+            name: error?.name,
+            stack: error?.stack,
             requestId: req?.requestId || null,
         });
     }
