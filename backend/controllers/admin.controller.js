@@ -9,6 +9,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import mongoose from "mongoose";
 import { recordAuditLog } from "../utils/audit.js";
+import { logControllerError } from "../utils/controllerError.js";
 
 // Generate a human-readable but strong password (12 chars, mixed).
 const generatePassword = () => {
@@ -70,7 +71,11 @@ export const getStats = async (req, res) => {
             success: true,
         });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -93,7 +98,11 @@ export const listUsers = async (req, res) => {
         const users = await User.find(filter).select("-password").sort({ createdAt: -1 });
         return res.status(200).json({ users, success: true });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -132,7 +141,11 @@ export const approveStudent = async (req, res) => {
         delete safe.password;
         return res.status(200).json({ message: "Student approved.", user: safe, success: true });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("approve_student_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -170,7 +183,11 @@ export const rejectStudent = async (req, res) => {
         delete safe.password;
         return res.status(200).json({ message: "Student rejected.", user: safe, success: true });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("reject_student_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -207,7 +224,11 @@ export const updateUserRole = async (req, res) => {
 
         return res.status(200).json({ message: "User role updated.", user, success: true });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -238,7 +259,11 @@ export const deleteUser = async (req, res) => {
 
         return res.status(200).json({ message: "User deleted.", success: true });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -343,7 +368,11 @@ export const createCompanyWithRecruiter = async (req, res) => {
             success: true,
         });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -385,7 +414,11 @@ export const resetRecruiterPassword = async (req, res) => {
             success: true,
         });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -403,7 +436,11 @@ export const listCompanies = async (req, res) => {
             .sort({ createdAt: -1 });
         return res.status(200).json({ companies, success: true });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -448,7 +485,11 @@ export const setCompanyVerified = async (req, res) => {
             success: true,
         });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -493,7 +534,11 @@ export const deleteCompany = async (req, res) => {
 
         return res.status(200).json({ message: "Company and related listings deleted.", success: true });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -513,7 +558,11 @@ export const listJobs = async (req, res) => {
             .sort({ createdAt: -1 });
         return res.status(200).json({ jobs, success: true });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -541,7 +590,11 @@ export const deleteJob = async (req, res) => {
 
         return res.status(200).json({ message: "Job deleted.", success: true });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -595,7 +648,11 @@ export const updateJobLifecycle = async (req, res) => {
 
         return res.status(200).json({ message: `Job moved to ${status}.`, job: updatedJob, success: true });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -642,7 +699,11 @@ export const listAuditLogs = async (req, res) => {
             success: true,
         });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -659,7 +720,11 @@ export const listInternships = async (req, res) => {
             .sort({ createdAt: -1 });
         return res.status(200).json({ internships, success: true });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -687,7 +752,11 @@ export const deleteInternship = async (req, res) => {
 
         return res.status(200).json({ message: "Internship deleted.", success: true });
     } catch (error) {
+<<<<<<< HEAD
         console.error(error);
+=======
+        logControllerError("admin_handler_failed", error, req);
+>>>>>>> 32d0a69bb892a37a7716dcd5230a53f0a15b5e76
         return res.status(500).json({ message: "Server error", success: false });
     }
 };

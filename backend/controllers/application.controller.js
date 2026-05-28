@@ -3,6 +3,7 @@ import { Job } from "../models/job.model.js";
 import { Company } from "../models/company.model.js";
 import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
+import { logControllerError } from "../utils/controllerError.js";
 
 export const applyJob = async (req, res) => {
     try {
@@ -167,7 +168,8 @@ export const applyJob = async (req, res) => {
             success:true
         })
     } catch (error) {
-        console.log(error);
+        logControllerError("apply_job_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
 export const getAppliedJobs = async (req,res) => {
@@ -192,7 +194,8 @@ export const getAppliedJobs = async (req,res) => {
             success:true
         })
     } catch (error) {
-        console.log(error);
+        logControllerError("get_applied_jobs_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 }
 // Per-job applicants. Admins see any job; recruiters only their own company's jobs.
@@ -220,8 +223,8 @@ export const getApplicants = async (req, res) => {
 
         return res.status(200).json({ job, success: true });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: 'Server error', success: false });
+        logControllerError("application_handler_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
 
@@ -278,8 +281,8 @@ export const getRecruiterJobs = async (req, res) => {
             success: true,
         });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: 'Server error', success: false });
+        logControllerError("application_handler_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
 
@@ -330,8 +333,8 @@ export const getRecruiterApplicantProfile = async (req, res) => {
 
         return res.status(200).json({ applicant, applications, success: true });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: 'Server error', success: false });
+        logControllerError("application_handler_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
 
@@ -361,8 +364,8 @@ export const getRecruiterApplicants = async (req, res) => {
             success: true,
         });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: 'Server error', success: false });
+        logControllerError("application_handler_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
 export const updateStatus = async (req,res) => {
@@ -409,6 +412,7 @@ export const updateStatus = async (req,res) => {
         });
 
     } catch (error) {
-        console.log(error);
+        logControllerError("update_application_status_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 }

@@ -1,5 +1,6 @@
 import { Internship } from "../models/internship.model.js";
 import { InternshipApplication } from "../models/internshipApplication.model.js";
+import { logControllerError } from "../utils/controllerError.js";
 
 export const createInternship = async (req, res) => {
     try {
@@ -31,7 +32,7 @@ export const createInternship = async (req, res) => {
 
         return res.status(201).json({ message: "Internship created successfully.", internship, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("internship_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -60,7 +61,7 @@ export const getAllInternships = async (req, res) => {
 
         return res.status(200).json({ internships, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("internship_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -77,7 +78,7 @@ export const getInternshipById = async (req, res) => {
 
         return res.status(200).json({ internship, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("internship_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -90,7 +91,7 @@ export const getAdminInternships = async (req, res) => {
 
         return res.status(200).json({ internships, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("internship_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -132,7 +133,7 @@ export const applyInternship = async (req, res) => {
             success: true,
         });
     } catch (error) {
-        console.log(error);
+        logControllerError("internship_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -149,7 +150,7 @@ export const getAppliedInternships = async (req, res) => {
 
         return res.status(200).json({ applications, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("internship_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -167,7 +168,7 @@ export const getInternshipApplicants = async (req, res) => {
         }
         return res.status(200).json({ internship, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("internship_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -195,7 +196,7 @@ export const updateInternshipApplicationStatus = async (req, res) => {
 
         return res.status(200).json({ message: "Status updated successfully.", success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("internship_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };

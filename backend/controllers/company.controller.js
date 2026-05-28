@@ -1,6 +1,7 @@
 import { Company } from "../models/company.model.js";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
+import { logControllerError } from "../utils/controllerError.js";
 
 export const registerCompany = async (req, res) => {
     try {
@@ -29,7 +30,8 @@ export const registerCompany = async (req, res) => {
             success: true
         })
     } catch (error) {
-        console.log(error);
+        logControllerError("register_company_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 }
 export const getCompany = async (req, res) => {
@@ -47,7 +49,8 @@ export const getCompany = async (req, res) => {
             success:true
         })
     } catch (error) {
-        console.log(error);
+        logControllerError("get_companies_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 }
 // get company by id
@@ -66,7 +69,8 @@ export const getCompanyById = async (req, res) => {
             success: true
         })
     } catch (error) {
-        console.log(error);
+        logControllerError("get_company_by_id_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 }
 export const updateCompany = async (req, res) => {
@@ -112,7 +116,7 @@ export const updateCompany = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error);
+        logControllerError("update_company_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
