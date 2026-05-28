@@ -123,6 +123,20 @@ const hideSensitiveFields = (_doc, ret) => {
 userSchema.set("toJSON", { transform: hideSensitiveFields });
 userSchema.set("toObject", { transform: hideSensitiveFields });
 
+// `password` is `select: false`, so most controllers load a User via
+// `findById` without the password hash. When such a doc is then `.save()`d,
+// Mongoose's `required: true` validator on `password` would otherwise fail
+// with "Path `password` is required." Tell Mongoose to skip validating /
+// persisting the password path when it wasn't loaded for this document.
+// If a caller explicitly assigns `user.password = ...`, normal validation
+// and persistence still apply.
+userSchema.pre("validate", function (next) {
+    if (!this.isNew && this.get("password", null, { getters: false }) === undefined) {
+        this.$ignore("password");
+    }
+    next();
+});
+
 userSchema.methods.calculateProfileCompletion = function () {
     let score = 0;
     const total = 10;

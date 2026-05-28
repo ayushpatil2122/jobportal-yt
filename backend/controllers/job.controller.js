@@ -1,6 +1,7 @@
 import { Job } from "../models/job.model.js";
 import { Company } from "../models/company.model.js";
 import { User } from "../models/user.model.js";
+import { logControllerError } from "../utils/controllerError.js";
 
 const sanitizeList = (value) => {
     if (Array.isArray(value)) {
@@ -188,7 +189,7 @@ export const postJob = async (req, res) => {
             success: true
         });
     } catch (error) {
-        console.log(error);
+        logControllerError("job_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 }
@@ -230,7 +231,8 @@ export const getAllJobs = async (req, res) => {
             success: true
         })
     } catch (error) {
-        console.log(error);
+        logControllerError("get_all_jobs_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 }
 // student
@@ -254,7 +256,8 @@ export const getJobById = async (req, res) => {
         };
         return res.status(200).json({ job, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("get_job_by_id_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 }
 // admin kitne job create kra hai abhi tk
@@ -276,6 +279,7 @@ export const getAdminJobs = async (req, res) => {
             success: true
         })
     } catch (error) {
-        console.log(error);
+        logControllerError("get_admin_jobs_failed", error, req);
+        return res.status(500).json({ message: "Server error", success: false });
     }
 }

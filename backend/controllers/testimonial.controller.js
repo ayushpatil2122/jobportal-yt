@@ -1,4 +1,5 @@
 import { Testimonial } from "../models/testimonial.model.js";
+import { logControllerError } from "../utils/controllerError.js";
 
 export const createTestimonial = async (req, res) => {
     try {
@@ -20,7 +21,7 @@ export const createTestimonial = async (req, res) => {
 
         return res.status(201).json({ message: "Testimonial submitted successfully.", testimonial, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("testimonial_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -34,7 +35,7 @@ export const getAllTestimonials = async (req, res) => {
 
         return res.status(200).json({ testimonials, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("testimonial_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
@@ -53,7 +54,7 @@ export const approveTestimonial = async (req, res) => {
 
         return res.status(200).json({ message: "Testimonial approved.", testimonial, success: true });
     } catch (error) {
-        console.log(error);
+        logControllerError("testimonial_handler_failed", error, req);
         return res.status(500).json({ message: "Server error", success: false });
     }
 };

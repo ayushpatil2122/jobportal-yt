@@ -269,3 +269,60 @@ test("external apply click creates pending record and avoids duplicates", async 
     assert.equal(jobDoc.applications.length, 1);
 });
 
+// Regression guard: with `password: { select: false }` on the User schema,
+// admin endpoints that load a target user via `findById` and then `.save()`
+// used to throw "Path `password` is required." and return 500. The pre-validate
+// hook in user.model.js must allow these partial updates through.
+test("admin can approve and reject a pending student without 500", async () => {
+    const adminPassword = await bcrypt.hash("AdminPass123", 10);
+    await User.create({
+        fullname: "Admin Approver",
+        email: "approver@example.com",
+        phoneNumber: 1112223333,
+        password: adminPassword,
+        role: "admin",
+    });
+
+    const pendingPassword = await bcrypt.hash("PendingPass123", 10);
+    const pending = await User.create({
+        fullname: "Pending Student",
+        email: "pending@example.com",
+        phoneNumber: 4445556666,
+        password: pendingPassword,
+        role: "student",
+        status: "pending",
+        college: "Test College",
+        rollNumber: "P001",
+    });
+
+    const adminAgent = request.agent(app);
+    await adminAgent.post("/api/v1/user/login").send({
+        email: "approver@example.com",
+        password: "AdminPass123",
+        role: "admin",
+    }).expect(200);
+
+    const approveRes = await adminAgent
+        .patch(`/api/v1/admin/users/${pending._id}/approve`)
+        .send({})
+        .expect(200);
+    assert.equal(approveRes.body.success, true);
+    assert.equal(approveRes.body.user.status, "approved");
+    assert.equal(approveRes.body.user.password, undefined, "approve response must not leak the password hash");
+
+    const afterApprove = await User.findById(pending._id).select("+password");
+    assert.equal(afterApprove.status, "approved");
+    assert.equal(afterApprove.password, pendingPassword, "approve must not wipe the existing password hash");
+
+    const rejectRes = await adminAgent
+        .patch(`/api/v1/admin/users/${pending._id}/reject`)
+        .send({ reason: "Incomplete profile" })
+        .expect(200);
+    assert.equal(rejectRes.body.success, true);
+    assert.equal(rejectRes.body.user.status, "rejected");
+    assert.equal(rejectRes.body.user.rejectionReason, "Incomplete profile");
+
+    const afterReject = await User.findById(pending._id).select("+password");
+    assert.equal(afterReject.password, pendingPassword, "reject must not wipe the existing password hash");
+});
+
